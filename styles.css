@@ -38,6 +38,10 @@ body {
     background-size: cover;
     background-position: center 70%;
   }
+
+  #section1 {
+    transform: translateY(-50px);
+  }
 }
 
 .content {
@@ -111,7 +115,6 @@ button {
   z-index: 1;
   color: white;
   padding: 3rem;
-  /* transform: translateY(-150px); */
 }
 
 #section4 {
