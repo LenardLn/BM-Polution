@@ -27,37 +27,6 @@ body {
   background-color: black;
 }
 
-@media screen and (max-width: 600px) {
-  #three-canvas {
-    opacity: 0;
-  }
-
-  .canvas-section-wrapper {
-    background-image: url("map-bg.webp");
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center 70%;
-  }
-
-  #section1 {
-    position: absolute;
-    top: -10%;
-  }
-  p,
-  button {
-    font-size: 1rem;
-    padding: 0 1rem;
-  }
-
-  h1 {
-    font-size: 1.5rem;
-  }
-
-  #cyanide-btn {
-    display: block;
-  }
-}
-
 .content {
   position: relative;
   z-index: 1;
@@ -183,4 +152,35 @@ button {
 .show {
   opacity: 1;
   filter: blur(0);
+}
+
+@media screen and (max-width: 600px) {
+  #three-canvas {
+    opacity: 0;
+  }
+
+  .canvas-section-wrapper {
+    background-image: url("map-bg.webp");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center 70%;
+  }
+
+  #section1 {
+    position: absolute;
+    top: -10%;
+  }
+  p,
+  button {
+    font-size: 1rem;
+    padding: 0 1rem;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  #cyanide-btn {
+    display: block !important;
+  }
 }
