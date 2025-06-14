@@ -16,6 +16,7 @@ body {
   height: 100vh;
   z-index: -1;
   pointer-events: none;
+  background-color: transparent;
 }
 .content {
   position: relative;

@@ -7,10 +7,12 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   1000
 );
-camera.position.z = 8;
+
+// Set camera position depending on screen size
+camera.position.z = window.innerWidth < 600 ? 5 : 8;
 
 const renderer = new THREE.WebGLRenderer({ canvas: canvas });
-renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setPixelRatio(window.devicePixelRatio || 1); // Handle device pixel ratio
 renderer.setSize(window.innerWidth, window.innerHeight);
 
 // Load Texture
@@ -21,81 +23,80 @@ const material = new THREE.MeshBasicMaterial({
   side: THREE.DoubleSide,
 });
 
-// Create Plane
-const aspect = window.innerWidth / window.innerHeight;
-const planeHeight = 5; // Adjust based on your image proportions
-const planeWidth = planeHeight * aspect;
+// Adjust the plane size for mobile devices
+const updatePlaneSize = () => {
+  const aspect = window.innerWidth / window.innerHeight;
 
-const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-const plane = new THREE.Mesh(geometry, material);
-scene.add(plane);
+  let planeWidth, planeHeight;
 
-// Position Camera
-camera.position.z = 8;
-
-// Animation
-document.addEventListener("DOMContentLoaded", () => {
-  const duration = 4000; // 4 seconds
-  let startTime = null;
-
-  function animateOnce(timestamp) {
-    if (!startTime) startTime = timestamp;
-    const elapsed = timestamp - startTime;
-    const t = Math.min(elapsed / duration, 1); // Normalize [0,1]
-
-    // Rotation: full 360°
-    plane.rotation.z = Math.PI * 2 * t;
-
-    // Scale: ease-in-out growth and shrink
-    const scale = 1 + Math.sin(Math.PI * t); // Goes from 1 to 2 to 1
-    plane.scale.set(scale, scale, 1);
-
-    renderer.render(scene, camera);
-
-    if (t < 1) {
-      requestAnimationFrame(animateOnce);
-    } else {
-      // Reset to original transform
-      plane.rotation.z = 0;
-      plane.scale.set(1, 1, 1);
-      plane.position.set(0, 0, 0);
-    }
+  if (window.innerWidth < 600) {
+    // For mobile, stop the map horizontally (use fixed dimensions)
+    planeWidth = 5; // Fixed width for mobile
+    planeHeight = planeWidth / aspect; // Maintain the correct ratio
+  } else {
+    // For larger screens, use responsive behavior
+    planeHeight = 5; // Adjust height
+    planeWidth = planeHeight * aspect; // Responsive width based on aspect ratio
   }
 
+  // Create or update the plane geometry with the new size
+  const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+  plane.geometry = geometry; // Reassign geometry to update the plane
+
+  // Reposition the plane and camera if needed
+  plane.position.set(0, 0, 0);
+};
+
+const plane = new THREE.Mesh(new THREE.PlaneGeometry(5, 5), material);
+scene.add(plane);
+
+// Animation Logic
+let startTime = null;
+const duration = 4000; // 4 seconds
+
+function animateOnce(timestamp) {
+  if (!startTime) startTime = timestamp;
+  const elapsed = timestamp - startTime;
+  const t = Math.min(elapsed / duration, 1); // Normalize [0,1]
+
+  // Rotation: full 360° based on the animation progress
+  plane.rotation.z = Math.PI * 2 * t;
+
+  // Scale: ease-in-out growth and shrink
+  const scale = 1 + Math.sin(Math.PI * t); // Goes from 1 to 2 to 1
+  plane.scale.set(scale, scale, 1);
+
+  renderer.render(scene, camera);
+
+  if (t < 1) {
+    requestAnimationFrame(animateOnce);
+  } else {
+    // Reset to original transform after animation ends
+    plane.rotation.z = 0;
+    plane.scale.set(1, 1, 1);
+    plane.position.set(0, 0, 0);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  updatePlaneSize(); // Set initial size of the plane
   requestAnimationFrame(animateOnce);
 });
 
-// Responsive Resize
+// Handle window resizing (responsive scaling)
 window.addEventListener("resize", () => {
-  camera.aspect = canvas.clientWidth / canvas.clientHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(canvas.clientWidth, canvas.clientHeight);
-});
-
-const locker = document.getElementById("cyanide-btn");
-let triggered = false;
-
-locker.onclick = () => {
-  triggered = !triggered;
-
-  if (triggered) {
-    document.body.classList.add("screen-locker");
-    document.body.style.paddingRight = getScrollbarWidth() + "px";
-  } else {
-    document.body.classList.remove("screen-locker");
-    document.body.style.paddingRight = "";
-  }
-};
-
-if (window.innerWidth < 1200) {
-  locker.style.display = "block";
-} else {
-  locker.style.display = "none";
-}
-
-function onWindowResize() {
+  // Update camera aspect ratio and size of the renderer
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+
+  // Adjust plane size based on the new aspect ratio
+  updatePlaneSize();
+});
+
+// Adjust the camera position dynamically
+if (window.innerWidth < 600) {
+  camera.position.z = 5; // Closer for mobile screens
+} else {
+  camera.position.z = 8; // Standard for larger screens
 }
-window.addEventListener("resize", onWindowResize, false);
