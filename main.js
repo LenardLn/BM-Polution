@@ -100,3 +100,14 @@ if (window.innerWidth < 600) {
 } else {
   camera.position.z = 8; // Standard for larger screens
 }
+
+const lockBtn = document.getElementById("cyanide-btn");
+const body = document.body;
+
+if (lockBtn) {
+  lockBtn.addEventListener("click", () => {
+    const isLocked = body.classList.toggle("screen-locker");
+
+    lockBtn.textContent = isLocked ? "Unlock screen" : "Lock screen";
+  });
+}
