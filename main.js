@@ -50,25 +50,36 @@ const updatePlaneSize = () => {
 const plane = new THREE.Mesh(new THREE.PlaneGeometry(5, 5), material);
 scene.add(plane);
 
-// Function to check if the device is mobile
-const isMobile = () => {
-  return window.innerWidth < 600;
-};
+// Animation Logic
+let startTime = null;
+const duration = 4000; // 4 seconds
 
-// Update canvas background and visibility for mobile devices
-const updateCanvasVisibility = () => {
-  if (isMobile()) {
-    canvas.style.backgroundColor = "transparent"; // Set background to transparent for mobile
-    canvas.style.display = "none"; // Hide canvas on mobile if you don't want it to render
+function animateOnce(timestamp) {
+  if (!startTime) startTime = timestamp;
+  const elapsed = timestamp - startTime;
+  const t = Math.min(elapsed / duration, 1); // Normalize [0,1]
+
+  // Rotation: full 360° based on the animation progress
+  plane.rotation.z = Math.PI * 2 * t;
+
+  // Scale: ease-in-out growth and shrink
+  const scale = 1 + Math.sin(Math.PI * t); // Goes from 1 to 2 to 1
+  plane.scale.set(scale, scale, 1);
+
+  renderer.render(scene, camera);
+
+  if (t < 1) {
+    requestAnimationFrame(animateOnce);
   } else {
-    canvas.style.display = "block"; // Show canvas on desktop
-    canvas.style.backgroundColor = "transparent"; // Ensure the background is transparent on desktop
+    // Reset to original transform after animation ends
+    plane.rotation.z = 0;
+    plane.scale.set(1, 1, 1);
+    plane.position.set(0, 0, 0);
   }
-};
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   updatePlaneSize(); // Set initial size of the plane
-  updateCanvasVisibility(); // Update canvas visibility based on the screen size
   requestAnimationFrame(animateOnce);
 });
 
@@ -81,9 +92,6 @@ window.addEventListener("resize", () => {
 
   // Adjust plane size based on the new aspect ratio
   updatePlaneSize();
-
-  // Adjust canvas visibility on window resize
-  updateCanvasVisibility();
 });
 
 // Adjust the camera position dynamically
