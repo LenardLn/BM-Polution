@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Baia Mare: Romania's Chernobyl</title>
+    <!-- Three.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <!-- OrbitControls -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- dat.GUI for buttons -->
+    <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.9/build/dat.gui.min.js"></script>
+    <!-- CSS -->
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="content">
+      <!-- Section 1: Title -->
+      <div class="canvas-section-wrapper">
+        <canvas  id="three-canvas"></canvas>
+        <section class="hidden" id="section1">
+          <h1>Baia Mare: <br/> The Mining Legacy</h1>
+          <p>Baia Mare, Romania, thrived on gold mining, but at a cost.</p>
+        </section>
+      </div>
+
+      <!-- Section 2: Mining History -->
+      <section class="hidden" id="section2">
+        <h1>Mining the Depths</h1>
+        <p>
+          In the heart of Maramureș County, Baia Mare emerged as a mining
+          powerhouse. Since Roman times, the region has been known for its rich
+          deposits of gold, silver, and other precious metals. By the 20th
+          century, industrial-scale mining began transforming the city. Massive
+          tunnels were carved into the mountains, and heavy machinery processed
+          ore day and night. While jobs and economic activity increased, so did
+          the pressure on the environment. Workers toiled in harsh conditions,
+          extracting resources that powered local industry but at an escalating
+          ecological cost.
+        </p>
+      </section>
+
+      <!-- Section 3: Pickaxe Animation Iframe -->
+      <section class="hidden" id="section3">
+
+        <iframe
+          src="test3.html"
+          loading="lazy"
+          width="100%"
+          height="400"
+          style="border: none"
+        ></iframe>
+      </section>
+
+     <section class="hidden tower-section" id="section4" >
+      <div class="tower-text">
+        <h1>Smoke in the Sky</h1>
+        <p>
+          The mining boom came with a visible cost: air pollution. The Turnul
+          Combinatului, a towering industrial chimney, became a symbol of Baia
+          Mare’s prosperity and its pollution. Smelting facilities and chemical
+          plants released toxic fumes into the air. Residents lived in the shadow
+          of constant smoke, with respiratory issues and environmental degradation
+          becoming increasingly common. The skyline of Baia Mare, once a beacon of
+          progress, darkened with soot and industrial haze.
+        </p>
+      </div>
+
+      <iframe
+        src="test2.html"
+        loading="lazy"
+        class="tower-iframe"
+        id="tower-iframe"
+      ></iframe>
+    </section>
+
+
+      <!-- Section 6: Cyanide Spill -->
+      <section class="hidden" id="section6">
+        <h1>The Cyanide Disaster</h1>
+        <p>
+          In January 2000, tragedy struck. A dam holding cyanide-contaminated
+          water at the Aurul gold processing plant burst. Over 100,000 cubic
+          meters of toxic waste spilled into the Someș River, contaminating the
+          Tisza and Danube rivers across several countries. This environmental
+          disaster devastated aquatic life, poisoned water supplies, and brought
+          international scrutiny to Baia Mare. It was one of Europe's worst
+          ecological catastrophes in decades.
+        </p>
+      </section>
+
+      <!-- Section 7: Cyanide Animation Iframe -->
+      <section class="hidden" id="section7">
+        <h1 style="transform: translateY(5rem);">The Spill in Motion</h1>
+        <iframe
+          src="test.html"
+          loading="lazy"
+          width="100%"
+          height="400"
+          style="border: none"
+          id="cyanide-box"
+        ></iframe>
+        <button id="cyanide-btn">Lock screen</button>
+      </section>
+
+      <!-- Section 8: Water Pollution and Animation -->
+      <section class="hidden" id="section8" style="position: relative; height: 400px;">
+      <!-- IFRAME as background -->
+      <iframe
+        src="test4.html"
+        loading="lazy"
+        width="100%"
+        height="100%"
+        style="border: none; position: absolute; top: 0; left: 0; z-index: 1;"
+      ></iframe>
+
+      <!-- Text content layered above iframe -->
+      <div style="position: relative; z-index: 2; color: white; padding: 2rem; transform: translateY(100px) !important;">
+        <h1>Rivers Tainted</h1>
+        <p>
+          The toxic waste didn’t just poison the rivers momentarily; it altered their ecosystems for years.
+          Fish died by the thousands, birds feeding along the rivers suffered, and communities lost access
+          to safe drinking water. The rivers that once nourished life became symbols of environmental neglect.
+          The need for stricter regulations and rehabilitation was clearer than ever.
+        </p>
+      </div>
+    </section>
+
+    <script defer src="main.js"></script>
+    <script defer src="script.js"></script>
+  </body>
+</html>

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=yes"
+    />
+    <title>Pickaxe Hit Animation</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        background: black;
+        overflow: hidden;
+      }
+
+      p,
+      button {
+        font-size: clamp(1rem, 1.5rem, 2rem);
+      }
+
+      h1 {
+        transform: translateY(100px);
+        color: white;
+        text-align: center;
+        font-size: 4rem;
+      }
+
+      #c {
+        width: 100%;
+        height: 90%;
+        display: block;
+      }
+
+      #hitButton {
+        width: fit-content;
+        border-radius: 999px;
+        padding: 0.5rem 3rem;
+        font-weight: bold;
+        margin: 0 auto;
+        height: 10%;
+        font-size: 2rem;
+        background: gold;
+        color: black;
+        border: none;
+        cursor: pointer;
+        transform: translateY(-10rem);
+        transition: all 0.25s ease-in-out;
+      }
+      #hitButton:hover {
+        background: darkorange;
+      }
+
+      @keyframes quickGrow {
+        50% {
+          transform: scale(1.1);
+        }
+
+        0%,
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .animate-grow {
+        animation: quickGrow 0.3s ease-in-out;
+      }
+
+      @media screen and (max-width: 600px) {
+        p,
+        button,
+        #hitButto {
+          font-size: 1rem;
+          padding: 0 1rem;
+        }
+
+        h1 {
+          font-size: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Tools of the Trade</h1>
+    <canvas id="c"></canvas>
+    <button id="hitButton">HIT!</button>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://threejs.org/build/three.module.js",
+          "three/addons/": "https://threejs.org/examples/jsm/"
+        }
+      }
+    </script>
+
+    <script type="module">
+      import * as THREE from "three";
+      import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
+      import { MTLLoader } from "three/addons/loaders/MTLLoader.js";
+
+      const canvas = document.querySelector("#c");
+      const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color("black");
+
+      const camera = new THREE.PerspectiveCamera(75, 2, 0.1, 100);
+      camera.position.set(0, 10, 20);
+
+      const hemiLight = new THREE.HemisphereLight(0xb1e1ff, 0xb97a20, 2);
+      scene.add(hemiLight);
+
+      const dirLight = new THREE.DirectionalLight(0xffffff, 2.5);
+      dirLight.position.set(0, 10, 0);
+      dirLight.target.position.set(-5, 0, 0);
+      scene.add(dirLight);
+      scene.add(dirLight.target);
+
+      let pickaxeModel = null;
+      let ores = null;
+      let coin = null;
+
+      const mtlLoader = new MTLLoader();
+
+      // Load pickaxe
+      mtlLoader.setPath("./");
+      mtlLoader.load("pickaxe.mtl", (materials) => {
+        materials.preload();
+        const objLoader = new OBJLoader();
+        objLoader.setMaterials(materials);
+        objLoader.setPath("./");
+
+        objLoader.load("pickaxe.obj", (root) => {
+          root.position.set(0, 10, 0);
+          root.scale.set(4, 4, 4);
+          root.rotation.x = Math.PI;
+          pickaxeModel = root;
+          scene.add(root);
+        });
+      });
+
+      // Load ores
+      mtlLoader.setPath("./");
+      mtlLoader.load("ores.mtl", (materials) => {
+        materials.preload();
+        const objLoader = new OBJLoader();
+        objLoader.setMaterials(materials);
+        objLoader.setPath("./");
+
+        objLoader.load("ores.obj", (root) => {
+          root.position.set(3, 11, 0);
+          root.scale.set(2, 2, 2);
+          root.rotation.x = Math.PI / 8;
+          ores = root;
+          scene.add(root);
+        });
+      });
+
+      // Resize handler
+      function resizeRendererToDisplaySize(renderer) {
+        const canvas = renderer.domElement;
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+        const needResize = canvas.width !== width || canvas.height !== height;
+        if (needResize) {
+          renderer.setSize(width, height, false);
+        }
+        return needResize;
+      }
+
+      // Main render loop
+      function render(time) {
+        time *= 0.001;
+
+        if (coin) {
+          coin.rotation.y += 0.02; // 🔄 Rotate coin on X
+        }
+
+        if (resizeRendererToDisplaySize(renderer)) {
+          const canvas = renderer.domElement;
+          camera.aspect = canvas.clientWidth / canvas.clientHeight;
+          camera.updateProjectionMatrix();
+        }
+
+        renderer.render(scene, camera);
+        requestAnimationFrame(render);
+      }
+
+      requestAnimationFrame(render);
+
+      // Button click + animation
+      const hitButton = document.getElementById("hitButton");
+
+      // Pickaxe swing animation
+      function swingPickaxe() {
+        if (!pickaxeModel) return;
+
+        const start = performance.now();
+        const duration = 700; // ms
+        const maxRotation = THREE.MathUtils.degToRad(90);
+
+        function animateHit(time) {
+          const elapsed = time - start;
+          const t = elapsed / duration;
+
+          if (t < 0.5) {
+            pickaxeModel.rotation.z = maxRotation * (t / 0.5);
+          } else if (t < 1) {
+            pickaxeModel.rotation.z = maxRotation * (1 - (t - 0.5) / 0.5);
+          } else {
+            pickaxeModel.rotation.z = 0;
+            return;
+          }
+
+          requestAnimationFrame(animateHit);
+        }
+
+        requestAnimationFrame(animateHit);
+      }
+
+      // Hit logic
+      let counter = 3;
+      hitButton.innerHTML = `<span> HIT! x ${counter}</span>`;
+      hitButton.onclick = () => {
+        counter--;
+        hitButton.innerHTML = `<span class="animate-grow">HIT! x ${counter}</span>`;
+        const span = hitButton.querySelector("span");
+
+        span.classList.add("animate-grow");
+
+        swingPickaxe();
+
+        if (counter === 0) {
+          hitButton.innerText = `NICE`;
+          setTimeout(() => {
+            span.classList.remove("animate-grow");
+
+            if (ores) scene.remove(ores); // Remove ore
+
+            const coinLoader = new MTLLoader();
+            coinLoader.setPath("./");
+            coinLoader.load("coin.mtl", (materials) => {
+              materials.preload();
+              const objLoader = new OBJLoader();
+              objLoader.setMaterials(materials);
+              objLoader.setPath("./");
+
+              objLoader.load("coin.obj", (root) => {
+                root.position.set(3, 11, 0);
+                root.scale.set(1.55, 1.55, 1.55);
+                root.rotation.y = Math.PI / 2;
+                root.rotation.z = -Math.PI / 8;
+                coin = root; // Save coin reference
+                scene.add(root);
+              });
+            });
+            hitButton.disabled = true;
+          }, 700); // Wait for swing animation
+        }
+      };
+    </script>
+  </body>
+</html>

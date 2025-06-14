@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cyanide Molecules with Border</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  </head>
+  <body style="margin: 0; overflow: hidden; background-color: black">
+    <p
+      style="
+        color: white;
+        font-size: 1rem;
+        z-index: 3;
+        position: absolute;
+        top: 20%;
+        left: 37.5%;
+      "
+    >
+      touch the atoms*
+    </p>
+    <canvas id="three-canvas"></canvas>
+
+    <script>
+      function createTextSprite(message, parameters = {}) {
+        const fontface = parameters.fontface || "Arial";
+        const fontsize = parameters.fontsize || 24;
+        const textColor = parameters.textColor || { r: 0, g: 0, b: 0, a: 1.0 };
+
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        context.font = `${fontsize}px ${fontface}`;
+        const padding = 10;
+        const textWidth = context.measureText(message).width;
+        canvas.width = textWidth + padding * 2;
+        canvas.height = fontsize + padding * 2;
+
+        context.fillStyle = `rgba(0,0,0,0)`;
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        context.font = `${fontsize}px ${fontface}`;
+        context.fillStyle = `rgba(${textColor.r},${textColor.g},${textColor.b},${textColor.a})`;
+        context.fillText(message, padding, fontsize + 2);
+
+        const texture = new THREE.CanvasTexture(canvas);
+        const material = new THREE.SpriteMaterial({
+          map: texture,
+          depthTest: false,
+        });
+        const sprite = new THREE.Sprite(material);
+
+        const scaleFactor = 0.05;
+        sprite.scale.set(
+          canvas.width * scaleFactor,
+          canvas.height * scaleFactor,
+          1
+        );
+        return sprite;
+      }
+
+      function createCyanideMolecule() {
+        const group = new THREE.Group();
+
+        const carbon = new THREE.Mesh(
+          new THREE.SphereGeometry(0.7, 16, 8),
+          new THREE.MeshStandardMaterial({ color: "darkgray" })
+        );
+        const nitrogen = new THREE.Mesh(
+          new THREE.SphereGeometry(0.5, 12, 6),
+          new THREE.MeshStandardMaterial({ color: "aqua" })
+        );
+        nitrogen.position.x = 1.5;
+
+        const orbit = new THREE.Group();
+        orbit.add(nitrogen);
+
+        group.add(carbon);
+        group.add(orbit);
+
+        const carbonLabel = createTextSprite("C", {
+          fontsize: 15,
+          textColor: { r: 255, g: 255, b: 255, a: 1 },
+        });
+        carbonLabel.position.set(0, 1, 0);
+        group.add(carbonLabel);
+
+        const nitrogenLabel = createTextSprite("N", {
+          fontsize: 15,
+          textColor: { r: 255, g: 255, b: 255, a: 1 },
+        });
+        nitrogenLabel.position.set(1.5, 1);
+        orbit.add(nitrogenLabel);
+
+        group.orbit = orbit;
+
+        const axes = ["y", "y", "y", "z"];
+        group.rotationAxis = axes[Math.floor(Math.random() * axes.length)];
+
+        return group;
+      }
+
+      function main() {
+        const canvas = document.querySelector("#three-canvas");
+        const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        const camera = new THREE.PerspectiveCamera(
+          75,
+          window.innerWidth / window.innerHeight,
+          0.1,
+          100
+        );
+        camera.position.z = 40;
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color("black");
+
+        scene.add(new THREE.AmbientLight("white", 0.3));
+        const light = new THREE.DirectionalLight("white", 1);
+        light.position.set(0, 30, 20);
+        scene.add(light);
+
+        const bounds = { x: 15, y: 15 };
+
+        // ✅ Only add border (no fill)
+        const borderGeometry = new THREE.PlaneGeometry(
+          bounds.x * 2,
+          bounds.y * 2
+        );
+        const edges = new THREE.EdgesGeometry(borderGeometry);
+        const borderMaterial = new THREE.LineBasicMaterial({ color: 0x003366 });
+        const border = new THREE.LineSegments(edges, borderMaterial);
+        border.position.z = -0.01;
+        scene.add(border);
+
+        const molecules = [];
+        const velocities = [];
+        const count = 80;
+
+        for (let i = 0; i < count; i++) {
+          const molecule = createCyanideMolecule();
+          molecule.position.set(
+            (Math.random() - 0.5) * bounds.x * 2,
+            (Math.random() - 0.5) * bounds.y * 2,
+            0
+          );
+          scene.add(molecule);
+          molecules.push(molecule);
+          velocities.push(
+            new THREE.Vector3(
+              (Math.random() - 0.5) * 0.2,
+              (Math.random() - 0.5) * 0.2,
+              (Math.random() - 0.5) * 0.2
+            )
+          );
+        }
+
+        const mouse = new THREE.Vector2();
+        const mouse3D = new THREE.Vector3();
+        const raycaster = new THREE.Raycaster();
+        let repulsionStrength = 0;
+        const repulsionDecay = 0.55;
+
+        function updateRepulsion(x, y) {
+          mouse.x = (x / window.innerWidth) * 2 - 1;
+          mouse.y = -(y / window.innerHeight) * 2 + 1;
+          raycaster.setFromCamera(mouse, camera);
+          const planeZ = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+          raycaster.ray.intersectPlane(planeZ, mouse3D);
+          repulsionStrength = 1.0;
+        }
+
+        canvas.addEventListener("mousemove", (e) =>
+          updateRepulsion(e.clientX, e.clientY)
+        );
+        canvas.addEventListener(
+          "touchmove",
+          (e) => {
+            if (e.touches.length > 0) {
+              updateRepulsion(e.touches[0].clientX, e.touches[0].clientY);
+            }
+          },
+          { passive: true }
+        );
+
+        function render(time) {
+          time *= 0.001;
+
+          for (let i = 0; i < molecules.length; i++) {
+            const molecule = molecules[i];
+            const velocity = velocities[i];
+
+            if (repulsionStrength > 0.01) {
+              const dx = molecule.position.x - mouse3D.x;
+              const dy = molecule.position.y - mouse3D.y;
+              const distSq = dx * dx + dy * dy;
+
+              if (distSq < 4) {
+                const force = (repulsionStrength * 0.1) / (distSq + 0.1);
+                velocity.x += dx * force;
+                velocity.y += dy * force;
+              }
+            }
+
+            velocity.multiplyScalar(0.9);
+
+            molecule.position.add(velocity);
+            molecule.position.z = 0;
+
+            if (Math.abs(molecule.position.x) > bounds.x) {
+              molecule.position.x = THREE.MathUtils.clamp(
+                molecule.position.x,
+                -bounds.x,
+                bounds.x
+              );
+              velocity.x *= -1;
+            }
+            if (Math.abs(molecule.position.y) > bounds.y) {
+              molecule.position.y = THREE.MathUtils.clamp(
+                molecule.position.y,
+                -bounds.y,
+                bounds.y
+              );
+              velocity.y *= -1;
+            }
+
+            const axis = molecule.rotationAxis;
+            molecule.orbit.rotation[axis] += 0.02;
+          }
+
+          repulsionStrength *= repulsionDecay;
+          renderer.render(scene, camera);
+          requestAnimationFrame(render);
+        }
+
+        window.addEventListener("resize", () => {
+          const width = window.innerWidth;
+          const height = window.innerHeight;
+          renderer.setSize(width, height);
+          camera.aspect = width / height;
+          camera.updateProjectionMatrix();
+        });
+
+        requestAnimationFrame(render);
+      }
+
+      main();
+    </script>
+  </body>
+</html>
