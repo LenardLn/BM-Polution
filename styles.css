@@ -40,7 +40,8 @@ body {
   }
 
   #section1 {
-    margin-top: -7rem;
+    position: absolute;
+    top: -5%;
   }
 }
 
