@@ -43,6 +43,19 @@ body {
     position: absolute;
     top: -10%;
   }
+  p,
+  button {
+    font-size: 1rem;
+    padding: 0 1rem;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  #cyanide-btn {
+    display: block;
+  }
 }
 
 .content {
@@ -159,18 +172,6 @@ button {
 
 .screen-locker {
   overflow: hidden;
-}
-
-@media screen and (max-width: 600px) {
-  p,
-  button {
-    font-size: 1rem;
-    padding: 0 1rem;
-  }
-
-  h1 {
-    font-size: 1.5rem;
-  }
 }
 
 .hidden {
