@@ -40,7 +40,7 @@ body {
   }
 
   #section1 {
-    transform: translateY(-100px);
+    margin-top: -7rem;
   }
 }
 
