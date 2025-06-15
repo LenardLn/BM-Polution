@@ -237,6 +237,7 @@
 
         if (counter === 0) {
           hitButton.innerText = `NICE`;
+          hitButton.disabled = true;
           setTimeout(() => {
             span.classList.remove("animate-grow");
 
@@ -259,7 +260,6 @@
                 scene.add(root);
               });
             });
-            hitButton.disabled = true;
           }, 700); // Wait for swing animation
         }
       };
